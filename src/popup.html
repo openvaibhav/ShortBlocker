@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShortBlocker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #222222;
+      --accent: #ff3c3c;
+      --accent-dim: rgba(255, 60, 60, 0.12);
+      --green: #00e676;
+      --green-dim: rgba(0, 230, 118, 0.1);
+      --text: #f0f0f0;
+      --muted: #555;
+      --mono: 'Space Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+
+    body {
+      width: 300px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: var(--display);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    /* Toggle Switch */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .toggle-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 20px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 3px;
+      top: 3px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle input:checked + .slider {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+    }
+
+    .toggle input:checked + .slider::before {
+      transform: translateX(16px);
+      background: var(--accent);
+    }
+
+    /* Stats */
+    .stats-block {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .stat-number {
+      font-family: var(--display);
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .stat-sub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Blocked platforms */
+    .platforms {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .platforms-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .platform-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .platform-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+
+    .platform-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .platform-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      flex-shrink: 0;
+    }
+
+    .platform-dot.red {
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    .platform-badge {
+      font-size: 9px;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(0,230,118,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .platform-badge.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-color: rgba(255,60,60,0.2);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-text {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .reset-btn {
+      font-family: var(--mono);
+      font-size: 9px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: border-color 0.15s, color 0.15s;
+      text-transform: uppercase;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Status bar */
+    .status-bar {
+      height: 3px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-bar-fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--accent), #ff6b35);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .status-bar-fill.off {
+      background: var(--muted);
+      transform: scaleX(0.1);
+    }
+
+    /* Disabled state overlay */
+    body.disabled .stat-number {
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-bar">
+    <div class="status-bar-fill" id="statusBar"></div>
+  </div>
+
+  <div class="header">
+    <div class="logo-group">
+      <div class="logo-icon">🚫</div>
+      <div class="logo-text">Short<span>Blocker</span></div>
+    </div>
+    <label class="toggle-wrap" title="Enable/Disable blocking">
+      <span class="toggle-label" id="toggleLabel">ON</span>
+      <div class="toggle">
+        <input type="checkbox" id="enableToggle" checked />
+        <span class="slider"></span>
+      </div>
+    </label>
+  </div>
+
+  <div class="stats-block">
+    <div class="stat-label">Tabs Killed Today</div>
+    <div class="stat-number" id="countDisplay">0</div>
+    <div class="stat-sub" id="lastBlocked">No distractions blocked yet.</div>
+  </div>
+
+  <div class="platforms">
+    <div class="platforms-label">Blocking</div>
+    <div class="platform-list">
+      <div class="platform-item">
+        <div class="platform-name">
+          <div class="platform-dot red" id="ytDot"></div>
+          YouTube Shorts
+        </div>
+        <div class="platform-badge active" id="ytBadge">ACTIVE</div>
+      </div>
+      <div class="platform-item">
+        <div class="platform-name">
+          <div class="platform-dot red" id="igDot"></div>
+          Instagram Reels
+        </div>
+        <div class="platform-badge active" id="igBadge">ACTIVE</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-text">v1.0.0 · Stay Focused</div>
+    <button class="reset-btn" id="resetBtn">Reset Count</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
