@@ -2,7 +2,7 @@
 
 > **Instantly kills YouTube Shorts and Instagram Reels tabs - no warnings, no second chances.**
 
-A lightweight Chrome/Firefox browser extension that closes tabs the moment you navigate to YouTube Shorts or Instagram Reels. Built for people who want a hard stop, not a nudge.
+A lightweight Chrome browser extension that closes tabs the moment you navigate to YouTube Shorts or Instagram Reels. Built for people who want a hard stop, not a nudge.
 
 ---
 
@@ -19,9 +19,7 @@ A lightweight Chrome/Firefox browser extension that closes tabs the moment you n
 
 ## 📦 Installation
 
-### Chrome / Chromium-based browsers (Edge, Brave, Arc, etc.)
-
-1. Download or clone this repository
+1. Clone the repository
    ```bash
    git clone https://github.com/openvaibhav/shortblocker.git
    ```
@@ -31,14 +29,7 @@ A lightweight Chrome/Firefox browser extension that closes tabs the moment you n
 5. Select the `shortblocker` folder
 6. The extension icon will appear in your toolbar ✅
 
-### Firefox
-
-1. Open Firefox and go to `about:debugging`
-2. Click **This Firefox** → **Load Temporary Add-on...**
-3. Navigate to the `shortblocker` folder and select `manifest.json`
-4. Done - note: temporary add-ons are removed on browser restart
-
-> **For permanent Firefox installation / Chrome Extension Marketplace:**  Working on it.
+> Works on all Chromium-based browsers - Chrome, Edge, Brave, Arc, Opera.
 
 ---
 
@@ -67,15 +58,15 @@ ShortBlocker uses a two-layer approach to make sure no Short or Reel ever loads:
 ### Layer 1 - Background Service Worker (`background.js`)
 - Listens to `chrome.tabs.onUpdated` and `chrome.tabs.onCreated`
 - The moment a tab's URL matches a Shorts/Reels pattern, it calls `chrome.tabs.remove()`
-- This catches direct links, new tab opens, and browser-level navigations
+- Uses a dedup set to prevent double-counting when multiple events fire for the same tab
 
 ### Layer 2 - Content Script (`content.js`)
 - Injected into YouTube and Instagram pages at `document_start`
 - Patches `history.pushState` and `history.replaceState` to catch in-app SPA navigation
-- This catches the case where you're already on YouTube and click into Shorts from the sidebar without a full page load
+- Catches the case where you're already on YouTube and click into Shorts from the sidebar without a full page reload
 
 ### URL Patterns Blocked
-| Platform  |        Pattern          |
+| Platform  | Pattern                 |
 |-----------|-------------------------|
 | YouTube   | `youtube.com/shorts/*`  |
 | Instagram | `instagram.com/reels/*` |
@@ -124,7 +115,6 @@ Pull requests are welcome! Some ideas for contribution:
 - [ ] Daily/weekly stats dashboard
 - [ ] Allowlist for specific channels
 - [ ] Custom redirect URL instead of closing (e.g., redirect to a focus page)
-- [ ] Firefox-compatible `.xpi` build script
 
 ---
 
