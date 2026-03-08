@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "ShortBlocker",
   "version": "1.0.0",
   "description": "Instantly closes YouTube Shorts and Instagram Reels tabs so you stay focused.",
@@ -10,17 +10,18 @@
   },
   "permissions": [
     "tabs",
-    "storage",
+    "storage"
+  ],
+  "host_permissions": [
     "https://www.youtube.com/*",
     "https://youtube.com/*",
     "https://www.instagram.com/*",
     "https://instagram.com/*"
   ],
   "background": {
-    "scripts": ["src/background.js"],
-    "persistent": false
+    "service_worker": "src/background.js"
   },
-  "browser_action": {
+  "action": {
     "default_popup": "src/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
