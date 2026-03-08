@@ -1,50 +1,49 @@
-const api = typeof browser !== "undefined" ? browser : chrome;
-
 const BLOCKED_PATTERNS = [
   /youtube\.com\/shorts\//i,
   /instagram\.com\/reels\//i,
   /instagram\.com\/reel\//i,
 ];
 
-let stats = { blockedCount: 0, lastBlocked: null };
+const closingTabs = new Set();
 
-api.storage.local.get(["blockedCount", "lastBlocked", "enabled"], (data) => {
-  stats.blockedCount = data.blockedCount || 0;
-  stats.lastBlocked = data.lastBlocked || null;
-  if (data.enabled === undefined) {
-    api.storage.local.set({ enabled: true });
-  }
-});
-
-function isBlockedUrl(url) {
+function isBlocked(url) {
   if (!url) return false;
   return BLOCKED_PATTERNS.some((p) => p.test(url));
 }
 
-async function handleTab(tabId, url) {
-  api.storage.local.get("enabled", (data) => {
-    if (data.enabled === false) return;
-    if (!isBlockedUrl(url)) return;
+async function killTab(tabId, url) {
+  if (!isBlocked(url)) return;
+  if (closingTabs.has(tabId)) return;
 
-    stats.blockedCount += 1;
-    stats.lastBlocked = new Date().toISOString();
-    api.storage.local.set({
-      blockedCount: stats.blockedCount,
-      lastBlocked: stats.lastBlocked,
-    });
+  const { enabled } = await chrome.storage.local.get("enabled");
+  if (enabled === false) return;
 
-    api.tabs.remove(tabId, () => {
-      if (api.runtime.lastError) { /* tab already closed */ }
-    });
+  closingTabs.add(tabId);
+
+  const { blockedCount = 0 } = await chrome.storage.local.get("blockedCount");
+  await chrome.storage.local.set({
+    blockedCount: blockedCount + 1,
+    lastBlocked: new Date().toISOString(),
+  });
+
+  chrome.tabs.remove(tabId, () => {
+    chrome.runtime.lastError;
+    closingTabs.delete(tabId);
   });
 }
 
-api.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.url) handleTab(tabId, changeInfo.url);
-  if (changeInfo.status === "loading" && tab.url) handleTab(tabId, tab.url);
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  const url = changeInfo.url || (changeInfo.status === "loading" && tab.url);
+  if (url) killTab(tabId, url);
 });
 
-api.tabs.onCreated.addListener((tab) => {
-  if (tab.url) handleTab(tab.id, tab.url);
-  if (tab.pendingUrl) handleTab(tab.id, tab.pendingUrl);
+chrome.tabs.onCreated.addListener((tab) => {
+  const url = tab.url || tab.pendingUrl;
+  if (url) killTab(tab.id, url);
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.local.get("enabled", (data) => {
+    if (data.enabled === undefined) chrome.storage.local.set({ enabled: true });
+  });
 });
