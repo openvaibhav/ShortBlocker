@@ -8,10 +8,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": [
-    "tabs",
-    "storage"
-  ],
+  "permissions": ["tabs", "storage"],
   "host_permissions": [
     "https://www.youtube.com/*",
     "https://youtube.com/*",
@@ -19,7 +16,8 @@
     "https://instagram.com/*"
   ],
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker": "src/background.js",
+    "scripts": ["src/background.js"]
   },
   "action": {
     "default_popup": "src/popup.html",
