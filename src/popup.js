@@ -1,3 +1,5 @@
+const api = typeof browser !== "undefined" ? browser : chrome;
+
 const countDisplay = document.getElementById("countDisplay");
 const lastBlockedEl = document.getElementById("lastBlocked");
 const enableToggle = document.getElementById("enableToggle");
@@ -39,7 +41,7 @@ function setEnabledUI(enabled) {
 }
 
 // Load initial state
-chrome.storage.local.get(["blockedCount", "lastBlocked", "enabled"], (data) => {
+api.storage.local.get(["blockedCount", "lastBlocked", "enabled"], (data) => {
   const count = data.blockedCount || 0;
   const enabled = data.enabled !== false;
 
@@ -52,13 +54,13 @@ chrome.storage.local.get(["blockedCount", "lastBlocked", "enabled"], (data) => {
 // Toggle enable/disable
 enableToggle.addEventListener("change", () => {
   const enabled = enableToggle.checked;
-  chrome.storage.local.set({ enabled });
+  api.storage.local.set({ enabled });
   setEnabledUI(enabled);
 });
 
 // Reset counter
 resetBtn.addEventListener("click", () => {
-  chrome.storage.local.set({ blockedCount: 0, lastBlocked: null });
+  api.storage.local.set({ blockedCount: 0, lastBlocked: null });
   countDisplay.textContent = "0";
   lastBlockedEl.textContent = "No distractions blocked yet.";
 
@@ -70,8 +72,8 @@ resetBtn.addEventListener("click", () => {
   }, 300);
 });
 
-// Listen for storage changes (live updates while popup is open)
-chrome.storage.onChanged.addListener((changes) => {
+// Listen for storage changes
+api.storage.onChanged.addListener((changes) => {
   if (changes.blockedCount) {
     countDisplay.textContent = changes.blockedCount.newValue || 0;
   }
