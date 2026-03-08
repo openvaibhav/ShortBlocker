@@ -21,7 +21,6 @@ function checkAndBlock() {
 
 checkAndBlock();
 
-// Watch for SPA navigation via History API
 const originalPushState = history.pushState.bind(history);
 const originalReplaceState = history.replaceState.bind(history);
 
